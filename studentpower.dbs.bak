@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="studentpower" database="PostgreSQL" id="PostgreSQL-167f" >
+	<comment><![CDATA[ERD for StudentPower database]]></comment>
+	<schema name="studentpower" >
+		<table name="admin" prior="Entity" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="school_id" type="uuid" jt="102" mandatory="y" />
+			<column name="staff_id" prior="teacher_id" type="uuid" jt="102" mandatory="y" />
+			<index name="pk_admin" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_admin_school" to_schema="studentpower" to_table="school" >
+				<fk_column name="school_id" pk="id" />
+			</fk>
+			<fk name="fk_admin_teacher" to_schema="studentpower" to_table="staff" >
+				<fk_column name="staff_id" pk="id" />
+			</fk>
+		</table>
+		<table name="class" prior="Entity" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="school_id" prior="staff_id" type="uuid" jt="102" mandatory="y" />
+			<column name="staff_id" prior="teacher_id" type="uuid" jt="102" mandatory="y" />
+			<column name="start_date" type="date" jt="91" />
+			<column name="end_date" type="date" jt="91" />
+			<index name="unq_id" unique="UNIQUE_INDEX" >
+				<column name="id" />
+			</index>
+			<index name="pk_class" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_class_school" to_schema="studentpower" to_table="school" >
+				<fk_column name="school_id" pk="id" />
+			</fk>
+			<fk name="fk_class_teacher" to_schema="studentpower" to_table="staff" >
+				<fk_column name="staff_id" pk="id" />
+			</fk>
+		</table>
+		<table name="company" prior="teacher_0" >
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="name" prior="255" type="varchar" length="255" jt="12" />
+			<column name="registration_code" prior="surname" type="varchar" length="100" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="password_hash" type="varchar" length="255" jt="12" />
+			<column name="address" prior="current_school" type="varchar" length="500" jt="12" mandatory="y" />
+			<column name="sector" prior="current_class" type="varchar" length="100" jt="12" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[TRUE]]></defo>
+			</column>
+			<index name="pk_entity_0" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_company" unique="UNIQUE_INDEX" >
+				<column name="email" />
+			</index>
+		</table>
+		<table name="course" prior="Entity" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="class_id" prior="school_id" type="uuid" jt="102" mandatory="y" />
+			<column name="staff_id" prior="teacher_id" type="uuid" jt="102" mandatory="y" />
+			<column name="start_date" type="date" jt="91" mandatory="y" />
+			<column name="end_date" type="date" jt="91" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[TRUE]]></defo>
+			</column>
+			<index name="pk_course" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_course_class" to_schema="studentpower" to_table="class" >
+				<fk_column name="class_id" pk="id" />
+			</fk>
+			<fk name="fk_course_teacher" to_schema="studentpower" to_table="staff" >
+				<fk_column name="staff_id" pk="id" />
+			</fk>
+		</table>
+		<table name="file" prior="tbl_0" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="project_id" type="uuid" jt="102" mandatory="y" />
+			<column name="file_bytea" type="bytea" jt="-2" mandatory="y" />
+			<column name="creation_time" type="timestamptz" jt="93" mandatory="y" />
+			<index name="pk_tbl_0" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_file_project" to_schema="studentpower" to_table="project" delete_action="cascade" update_action="cascade" >
+				<fk_column name="project_id" pk="id" />
+			</fk>
+		</table>
+		<table name="payment" prior="proje" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="description" type="varchar" length="255" jt="12" mandatory="y" />
+			<column name="price" type="money" jt="3" mandatory="y" />
+			<column name="project_id" type="integer" jt="4" mandatory="y" />
+			<column name="paid" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[FALSE]]></defo>
+			</column>
+			<index name="pk_payment" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_payment_project" to_schema="studentpower" to_table="project" >
+				<fk_column name="project_id" pk="id" />
+			</fk>
+		</table>
+		<table name="project" prior="tbl" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="255" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="company_id" type="uuid" jt="102" mandatory="y" />
+			<column name="course_id" type="uuid" jt="102" />
+			<column name="creation_time" prior="creation_date" type="timestamptz" jt="93" mandatory="y" />
+			<index name="pk_project" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_project_company" to_schema="studentpower" to_table="company" >
+				<fk_column name="company_id" pk="id" />
+			</fk>
+			<fk name="fk_project_course" to_schema="studentpower" to_table="course" >
+				<fk_column name="course_id" pk="id" />
+			</fk>
+		</table>
+		<table name="school" prior="Entity" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="address" type="varchar" length="255" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" >
+				<defo><![CDATA[TRUE]]></defo>
+			</column>
+			<index name="pk_school" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="staff" prior="teacher" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" />
+			<column name="surname" type="varchar" length="100" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="password_hash" type="varchar" length="255" jt="12" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[TRUE]]></defo>
+			</column>
+			<index name="pk_entity" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_staff" unique="UNIQUE_INDEX" >
+				<column name="email" />
+			</index>
+		</table>
+		<table name="student" prior="Entity" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="50" jt="12" />
+			<column name="surname" type="varchar" length="50" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="password_hash" type="varchar" length="255" jt="12" />
+			<column name="school_id" prior="current_school" type="uuid" jt="102" />
+			<column name="class_id" prior="current_class" type="uuid" jt="102" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[TRUE]]></defo>
+			</column>
+			<index name="pk_student" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_student" unique="UNIQUE_INDEX" >
+				<column name="email" />
+			</index>
+			<fk name="fk_student_school" to_schema="studentpower" to_table="school" >
+				<fk_column name="school_id" pk="id" />
+			</fk>
+			<fk name="fk_student_class" to_schema="studentpower" to_table="class" >
+				<fk_column name="class_id" pk="id" />
+			</fk>
+		</table>
+		<table name="tbl" />
+	</schema>
+	<layout name="StudentPower ERD" id="Diagram-f87" confirmed="y" joined_routing="y" deduced_fks="y" show_column_type="y" show_relation="columns" >
+		<comment><![CDATA[Default Diagram]]></comment>
+		<entity schema="studentpower" name="admin" color="C1D8EE" x="416" y="496" />
+		<entity schema="studentpower" name="class" color="3986C1" x="48" y="656" />
+		<entity schema="studentpower" name="company" color="3986C1" x="640" y="80" />
+		<entity schema="studentpower" name="course" color="C1D8EE" x="464" y="656" />
+		<entity schema="studentpower" name="file" color="C1D8EE" x="800" y="560" />
+		<entity schema="studentpower" name="payment" color="C1D8EE" x="800" y="752" />
+		<entity schema="studentpower" name="project" color="3986C1" x="784" y="384" />
+		<entity schema="studentpower" name="school" color="C1D8EE" x="48" y="432" />
+		<entity schema="studentpower" name="staff" color="C1D8EE" x="352" y="80" />
+		<entity schema="studentpower" name="student" color="3986C1" x="48" y="80" />
+		<group name="USER" color="C4E0F9" >
+			<entity schema="studentpower" name="student" />
+			<entity schema="studentpower" name="staff" />
+			<entity schema="studentpower" name="company" />
+		</group>
+		<group name="SCHOOL" color="FF8080" >
+			<entity schema="studentpower" name="class" />
+			<entity schema="studentpower" name="school" />
+			<entity schema="studentpower" name="course" />
+			<entity schema="studentpower" name="admin" />
+		</group>
+		<group name="PROJECT" color="FFB366" >
+			<entity schema="studentpower" name="payment" />
+			<entity schema="studentpower" name="project" />
+			<entity schema="studentpower" name="file" />
+		</group>
+	</layout>
+</project>

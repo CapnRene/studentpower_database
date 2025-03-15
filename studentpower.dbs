@@ -1,161 +1,232 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project name="studentpower" database="LogicalDesign" id="LogicalDesign-f25" >
+<project name="studentpower" database="PostgreSQL" id="PostgreSQL-167f" >
 	<comment><![CDATA[ERD for StudentPower database]]></comment>
-	<schema name="StudentPower" >
-		<table name="admin" prior="Entity" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" />
-			<column name="school_id" type="UUID" jt="1111" mandatory="y" />
-			<column name="teacher_id" type="UUID" jt="1111" mandatory="y" />
+	<schema name="projects" >
+		<table name="file" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="project_id" type="uuid" jt="102" mandatory="y" />
+			<column name="file_bytea" type="bytea" jt="-2" mandatory="y" />
+			<column name="creation_time" type="timestamptz" jt="93" mandatory="y" />
+			<index name="pk_tbl_0" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_file_project" to_schema="projects" to_table="project" delete_action="cascade" update_action="cascade" >
+				<fk_column name="project_id" pk="id" />
+			</fk>
+		</table>
+		<table name="payment" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="description" type="varchar" length="255" jt="12" mandatory="y" />
+			<column name="price" type="money" jt="3" mandatory="y" />
+			<column name="project_id" type="integer" jt="4" mandatory="y" />
+			<column name="paid" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[FALSE]]></defo>
+			</column>
+			<index name="pk_payment" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_payment_project" to_schema="projects" to_table="project" >
+				<fk_column name="project_id" pk="id" />
+			</fk>
+		</table>
+		<table name="project" prior="project_0" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="255" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="company_id" type="uuid" jt="102" mandatory="y" />
+			<column name="course_id" type="uuid" jt="102" />
+			<column name="creation_time" prior="creation_date" type="timestamptz" jt="93" mandatory="y" />
+			<index name="pk_project" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_project_company" to_schema="users" to_table="company" >
+				<fk_column name="company_id" pk="id" />
+			</fk>
+			<fk name="fk_project_course" to_schema="schools" to_table="course" >
+				<fk_column name="course_id" pk="id" />
+			</fk>
+		</table>
+	</schema>
+	<schema name="schools" >
+		<table name="admin" prior="Entity" generator_rows="150" generator_order="3" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="school_id" type="uuid" jt="102" mandatory="y" />
+			<column name="staff_id" prior="teacher_id" type="uuid" jt="102" mandatory="y" />
 			<index name="pk_admin" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
-			<fk name="fk_admin_school" to_schema="StudentPower" to_table="school" type="Identifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" >
+			<fk name="fk_admin_school" to_schema="schools" to_table="school" >
 				<fk_column name="school_id" pk="id" />
 			</fk>
-			<fk name="fk_admin_teacher" to_schema="StudentPower" to_table="teacher" type="NonIdentifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
-				<fk_column name="teacher_id" pk="id" />
+			<fk name="fk_admin_teacher" to_schema="users" to_table="staff" >
+				<fk_column name="staff_id" pk="id" />
 			</fk>
 		</table>
-		<table name="class" prior="Entity" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" />
-			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" />
-			<column name="description" type="TEXT" jt="-1" />
-			<column name="school_id" type="UUID" jt="1111" mandatory="y" />
-			<column name="teacher_id" type="UUID" jt="1111" mandatory="y" />
-			<column name="start_date" type="DATE" jt="91" />
-			<column name="end_date" type="DATE" jt="91" />
+		<table name="class" prior="Entity" generator_rows="150" generator_order="4" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="school_id" prior="staff_id" type="uuid" jt="102" mandatory="y" />
+			<column name="staff_id" prior="teacher_id" type="uuid" jt="102" mandatory="y" />
+			<column name="start_date" type="date" jt="91" />
+			<column name="end_date" type="date" jt="91" />
+			<index name="unq_id" unique="UNIQUE_INDEX" >
+				<column name="id" />
+			</index>
 			<index name="pk_class" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
-			<fk name="fk_class_school" to_schema="StudentPower" to_table="school" type="Identifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
+			<fk name="fk_class_school" to_schema="schools" to_table="school" >
 				<fk_column name="school_id" pk="id" />
 			</fk>
-			<fk name="fk_class_teacher" to_schema="StudentPower" to_table="teacher" type="Identifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
-				<fk_column name="teacher_id" pk="id" />
+			<fk name="fk_class_teacher" to_schema="users" to_table="staff" >
+				<fk_column name="staff_id" pk="id" />
 			</fk>
 		</table>
-		<table name="company" prior="teacher_0" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" >
-				<defo><![CDATA[gen_random_uuid()]]></defo>
-			</column>
-			<column name="name" type="VARCHAR" length="100" jt="12" />
-			<column name="registration_code" prior="surname" type="VARCHAR" length="100" jt="12" />
-			<column name="email" type="VARCHAR" length="50" jt="12" />
-			<column name="password_hash" type="VARCHAR" length="255" jt="12" />
-			<column name="current_school" type="UUID" jt="1111" />
-			<column name="current_class" type="UUID" jt="1111" />
-			<column name="registration_date" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="last_login" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="active" type="BOOLEAN" jt="-7" mandatory="y" >
-				<defo><![CDATA[TRUE]]></defo>
-			</column>
-			<index name="pk_Entity_0" unique="PRIMARY_KEY" >
-				<column name="id" />
-			</index>
-		</table>
-		<table name="course" prior="Entity" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" >
-				<defo><![CDATA[gen_random_uuid()]]></defo>
-			</column>
-			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" />
-			<column name="description" type="TEXT" jt="-1" />
-			<column name="email" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="class_id" prior="school_id" type="UUID" jt="1111" mandatory="y" />
-			<column name="teacher_id" prior="teacher" type="UUID" jt="1111" mandatory="y" />
-			<column name="start_date" type="DATE" jt="91" mandatory="y" />
-			<column name="end_date" type="DATE" jt="91" mandatory="y" />
-			<column name="active" type="BOOLEAN" jt="-7" mandatory="y" >
+		<table name="course" prior="Entity" generator_rows="225" generator_order="5" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="class_id" prior="school_id" type="uuid" jt="102" mandatory="y" />
+			<column name="staff_id" prior="teacher_id" type="uuid" jt="102" mandatory="y" />
+			<column name="start_date" type="date" jt="91" mandatory="y" />
+			<column name="end_date" type="date" jt="91" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
 				<defo><![CDATA[TRUE]]></defo>
 			</column>
 			<index name="pk_course" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
-			<fk name="fk_course_class" to_schema="StudentPower" to_table="class" type="Identifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
+			<fk name="fk_course_class" to_schema="schools" to_table="class" >
 				<fk_column name="class_id" pk="id" />
 			</fk>
-			<fk name="fk_course_teacher" to_schema="StudentPower" to_table="teacher" type="Identifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
-				<fk_column name="teacher_id" pk="id" />
+			<fk name="fk_course_teacher" to_schema="users" to_table="staff" >
+				<fk_column name="staff_id" pk="id" />
 			</fk>
 		</table>
-		<table name="school" prior="Entity" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" >
-				<defo><![CDATA[gen_random_uuid()]]></defo>
-			</column>
-			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" />
-			<column name="address" type="VARCHAR" length="255" jt="12" />
-			<column name="email" type="VARCHAR" length="50" jt="12" mandatory="y" />
-			<column name="registration_date" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="last_login" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="active" type="BOOLEAN" jt="-7" >
+		<table name="school" prior="Entity" generator_rows="100" generator_order="1" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" mandatory="y" />
+			<column name="address" type="varchar" length="255" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" >
 				<defo><![CDATA[TRUE]]></defo>
 			</column>
 			<index name="pk_school" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
 		</table>
-		<table name="student" prior="Entity" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" >
+	</schema>
+	<schema name="users" >
+		<table name="company" >
+			<column name="id" type="uuid" jt="102" mandatory="y" >
 				<defo><![CDATA[gen_random_uuid()]]></defo>
 			</column>
-			<column name="name" type="VARCHAR" length="50" jt="12" />
-			<column name="surname" type="VARCHAR" length="50" jt="12" />
-			<column name="email" type="VARCHAR" length="50" jt="12" mandatory="y" >
-				<column_options><![CDATA[UNIQUE]]></column_options>
+			<column name="name" prior="255" type="varchar" length="255" jt="12" />
+			<column name="registration_code" prior="surname" type="varchar" length="100" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="password_hash" type="varchar" length="255" jt="12" />
+			<column name="address" prior="current_school" type="varchar" length="500" jt="12" mandatory="y" />
+			<column name="sector" prior="current_class" type="varchar" length="100" jt="12" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[TRUE]]></defo>
 			</column>
-			<column name="password_hash" type="VARCHAR" length="255" jt="12" />
-			<column name="school_id" prior="current_school" type="UUID" jt="1111" />
-			<column name="current_class" type="UUID" jt="1111" />
-			<column name="registration_date" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="last_login" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="active" type="BOOLEAN" jt="-7" mandatory="y" >
+			<index name="pk_entity_0" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_company" unique="UNIQUE_INDEX" >
+				<column name="email" />
+			</index>
+		</table>
+		<table name="login" prior="login " >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="email" type="varchar" length="50" jt="12" />
+			<column name="password_hash" prior="email" type="varchar" length="255" jt="12" />
+			<index name="pk_login" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="staff" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="100" jt="12" />
+			<column name="surname" type="varchar" length="100" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="password_hash" type="varchar" length="255" jt="12" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[TRUE]]></defo>
+			</column>
+			<index name="pk_entity" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_staff" unique="UNIQUE_INDEX" >
+				<column name="email" />
+			</index>
+		</table>
+		<table name="student" >
+			<column name="id" type="uuid" jt="102" mandatory="y" />
+			<column name="name" type="varchar" length="50" jt="12" />
+			<column name="surname" type="varchar" length="50" jt="12" />
+			<column name="email" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="password_hash" type="varchar" length="255" jt="12" />
+			<column name="school_id" prior="current_school" type="uuid" jt="102" />
+			<column name="class_id" prior="current_class" type="uuid" jt="102" />
+			<column name="registration_date" type="timestamptz" jt="93" mandatory="y" />
+			<column name="last_login" type="timestamptz" jt="93" mandatory="y" />
+			<column name="active" type="boolean" jt="16" mandatory="y" >
 				<defo><![CDATA[TRUE]]></defo>
 			</column>
 			<index name="pk_student" unique="PRIMARY_KEY" >
 				<column name="id" />
 			</index>
-			<fk name="fk_student_school" to_schema="StudentPower" to_table="school" type="NonIdentifying" mandatory="n" cardinality="ZeroMore" range_from="0" range_to="0" >
+			<index name="unq_student" unique="UNIQUE_INDEX" >
+				<column name="email" />
+			</index>
+			<fk name="fk_student_school" to_schema="schools" to_table="school" >
 				<fk_column name="school_id" pk="id" />
 			</fk>
-		</table>
-		<table name="teacher" prior="Teacher" >
-			<column name="id" type="UUID" jt="1111" mandatory="y" >
-				<defo><![CDATA[gen_random_uuid()]]></defo>
-			</column>
-			<column name="name" type="VARCHAR" length="100" jt="12" />
-			<column name="surname" type="VARCHAR" length="100" jt="12" />
-			<column name="email" type="VARCHAR" length="50" jt="12" />
-			<column name="password_hash" type="VARCHAR" length="255" jt="12" />
-			<column name="school_id" prior="current_school" type="UUID" jt="1111" />
-			<column name="course_id" prior="current_course" type="UUID" jt="1111" />
-			<column name="registration_date" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="last_login" type="TIMESTAMPTZ" jt="1111" mandatory="y" />
-			<column name="active" type="BOOLEAN" jt="-7" mandatory="y" >
-				<defo><![CDATA[TRUE]]></defo>
-			</column>
-			<index name="pk_Entity" unique="PRIMARY_KEY" >
-				<column name="id" />
-			</index>
+			<fk name="fk_student_class" to_schema="schools" to_table="class" >
+				<fk_column name="class_id" pk="id" />
+			</fk>
 		</table>
 	</schema>
-	<layout name="Default Diagram" id="Diagram-1840" show_column_type="y" show_relation="columns" >
+	<layout name="StudentPower ERD" id="Diagram-f87" confirmed="y" joined_routing="y" deduced_fks="y" show_column_type="y" show_schema_name="y" show_relation="columns" >
 		<comment><![CDATA[Default Diagram]]></comment>
-		<entity schema="StudentPower" name="admin" color="C1D8EE" x="720" y="448" />
-		<entity schema="StudentPower" name="class" color="3986C1" x="368" y="464" />
-		<entity schema="StudentPower" name="company" color="3986C1" x="640" y="80" />
-		<entity schema="StudentPower" name="course" color="C1D8EE" x="560" y="656" />
-		<entity schema="StudentPower" name="school" color="C1D8EE" x="80" y="448" />
-		<entity schema="StudentPower" name="student" color="3986C1" x="48" y="80" />
-		<entity schema="StudentPower" name="teacher" color="C1D8EE" x="352" y="80" />
-		<group name="users" color="C4E0F9" >
-			<entity schema="StudentPower" name="company" />
-			<entity schema="StudentPower" name="student" />
-			<entity schema="StudentPower" name="teacher" />
+		<entity schema="schools" name="admin" color="C1D8EE" x="416" y="624" />
+		<entity schema="schools" name="class" color="3986C1" x="48" y="784" />
+		<entity schema="users" name="company" color="3986C1" x="656" y="80" />
+		<entity schema="schools" name="course" color="C1D8EE" x="464" y="784" />
+		<entity schema="projects" name="file" color="3986C1" x="816" y="704" />
+		<entity schema="users" name="login" color="C1D8EE" x="368" y="288" />
+		<entity schema="projects" name="payment" color="3986C1" x="816" y="896" />
+		<entity schema="projects" name="project" color="3986C1" x="800" y="528" />
+		<entity schema="schools" name="school" color="C1D8EE" x="48" y="560" />
+		<entity schema="users" name="staff" color="3986C1" x="368" y="80" />
+		<entity schema="users" name="student" color="3986C1" x="64" y="80" />
+		<group name="SCHOOLS" color="FF8080" >
+			<entity schema="schools" name="class" />
+			<entity schema="schools" name="school" />
+			<entity schema="schools" name="course" />
+			<entity schema="schools" name="admin" />
 		</group>
-		<group name="SCHOOL_" color="C4E0F9" >
-			<entity schema="StudentPower" name="admin" />
-			<entity schema="StudentPower" name="course" />
-			<entity schema="StudentPower" name="class" />
-			<entity schema="StudentPower" name="school" />
+		<group name="PROJECTS" color="FFB366" >
+			<entity schema="projects" name="file" />
+			<entity schema="projects" name="payment" />
+			<entity schema="projects" name="project" />
+		</group>
+		<group name="USERS" color="C4E0F9" >
+			<entity schema="users" name="company" />
+			<entity schema="users" name="staff" />
+			<entity schema="users" name="student" />
+			<entity schema="users" name="login" />
 		</group>
 	</layout>
 </project>
